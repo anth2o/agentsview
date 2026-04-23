@@ -126,6 +126,7 @@ agentsview auto-discovers sessions from all of these:
 | Kiro CLI       | `~/.kiro/sessions/cli/`                            |
 | Kiro IDE       | `~/Library/Application Support/Kiro/` (macOS)      |
 | Cortex Code    | `~/.snowflake/cortex/conversations/`               |
+| Mistral Vibe   | `~/.vibe/logs/session/`                            |
 
 Each directory can be overridden with an environment variable. See the
 [configuration docs](https://agentsview.io/configuration/) for details.

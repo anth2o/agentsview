@@ -32,6 +32,7 @@ const (
 	AgentHermes        AgentType = "hermes"
 	AgentWarp          AgentType = "warp"
 	AgentPositron      AgentType = "positron"
+	AgentVibe          AgentType = "vibe"
 )
 
 // AgentDef describes a supported coding agent's filesystem
@@ -319,6 +320,18 @@ var Registry = []AgentDef{
 		FileBased:      true,
 		DiscoverFunc:   DiscoverPositronSessions,
 		FindSourceFunc: FindPositronSourceFile,
+	},
+	{
+		Type:           AgentVibe,
+		DisplayName:    "Mistral Vibe",
+		EnvVar:         "VIBE_SESSIONS_DIR",
+		ConfigKey:      "vibe_sessions_dirs",
+		DefaultDirs:    []string{".vibe/logs/session"},
+		IDPrefix:       "vibe:",
+		ShallowWatch:   true,
+		FileBased:      true,
+		DiscoverFunc:   DiscoverVibeSessions,
+		FindSourceFunc: FindVibeSourceFile,
 	},
 }
 

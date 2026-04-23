@@ -1,0 +1,17 @@
+{
+  "session_id": "7972424f-ecdb-4d2b-ab1a-add8b940114a",
+  "start_time": "2026-03-03T14:20:51.868474+00:00",
+  "end_time": "2026-03-03T14:23:51.382385+00:00",
+  "git_branch": "main",
+  "environment": {
+    "working_directory": "/Users/dev/workspace/my-project"
+  },
+  "title": "Fix the build",
+  "config": {
+    "active_model": "devstral-2"
+  },
+  "stats": {
+    "session_prompt_tokens": 22082,
+    "session_completion_tokens": 87
+  }
+}

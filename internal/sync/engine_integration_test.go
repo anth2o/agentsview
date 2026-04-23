@@ -29,6 +29,7 @@ type testEnv struct {
 	iflowDir    string
 	ampDir      string
 	piDir       string
+	vibeDir     string
 	db          *db.DB
 	engine      *sync.Engine
 }
@@ -134,6 +135,7 @@ func setupTestEnv(t *testing.T, opts ...TestEnvOption) *testEnv {
 			parser.AgentIflow:    {env.iflowDir},
 			parser.AgentAmp:      {env.ampDir},
 			parser.AgentPi:       {env.piDir},
+			parser.AgentVibe:     {env.vibeDir},
 		},
 		Machine: "local",
 		Emitter: options.emitter,
@@ -222,6 +224,19 @@ func (e *testEnv) writeAmpThread(
 ) string {
 	t.Helper()
 	return e.writeSession(t, e.ampDir, filename, content)
+}
+
+// writeVibeSession creates a Vibe session directory with
+// meta.json and messages.jsonl under the Vibe sessions dir.
+func (e *testEnv) writeVibeSession(
+	t *testing.T, sessionDir, meta, messages string,
+) string {
+	t.Helper()
+	metaPath := filepath.Join(e.vibeDir, sessionDir, "meta.json")
+	dbtest.WriteTestFile(t, metaPath, []byte(meta))
+	msgPath := filepath.Join(e.vibeDir, sessionDir, "messages.jsonl")
+	dbtest.WriteTestFile(t, msgPath, []byte(messages))
+	return msgPath
 }
 
 // writeCursorSession creates a Cursor transcript file under
@@ -1207,6 +1222,38 @@ func TestSyncPathsAmpRejectsWrongStructure(t *testing.T) {
 	if sess != nil {
 		t.Error("Amp files outside root-level valid T-<id>.json should be ignored")
 	}
+}
+
+func TestSyncEngineVibe(t *testing.T) {
+	env := setupTestEnv(t)
+
+	meta := `{
+		"session_id": "abc-123",
+		"start_time": "2024-06-15T10:00:00Z",
+		"end_time": "2024-06-15T10:05:00Z",
+		"environment": {"working_directory": "/home/user/my_project"},
+		"config": {"active_model": "opus-4.6"},
+		"stats": {"session_prompt_tokens": 5000, "session_completion_tokens": 200}
+	}`
+	messages := `{"role":"user","content":"fix the bug","message_id":"m1"}
+{"role":"assistant","content":"I found the issue.","message_id":"m2"}`
+
+	env.writeVibeSession(t, "session_test_abc123", meta, messages)
+
+	runSyncAndAssert(t, env.engine, sync.SyncStats{
+		TotalSessions: 1,
+		Synced:        1,
+	})
+
+	assertSessionState(t, env.db, "vibe:abc-123", func(sess *db.Session) {
+		if sess.Agent != "vibe" {
+			t.Errorf("agent = %q, want vibe", sess.Agent)
+		}
+		if sess.Project != "my_project" {
+			t.Errorf("project = %q, want my_project", sess.Project)
+		}
+	})
+	assertSessionMessageCount(t, env.db, "vibe:abc-123", 2)
 }
 
 func TestSyncPathsStatsUpdated(t *testing.T) {

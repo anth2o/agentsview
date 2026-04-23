@@ -1,0 +1,6 @@
+{"role": "user", "content": "Fix the build error in main.go", "message_id": "msg-001"}
+{"role": "assistant", "content": "Let me check the error.", "tool_calls": [{"id": "tc-001", "index": 0, "function": {"name": "bash", "arguments": "{\"command\": \"go build ./...\"}"}, "type": "function"}], "message_id": "msg-002"}
+{"role": "tool", "content": "main.go:10: undefined: foo", "name": "bash", "tool_call_id": "tc-001"}
+{"role": "assistant", "content": "The issue is that `foo` is undefined. Let me fix it.", "tool_calls": [{"id": "tc-002", "index": 0, "function": {"name": "search_replace", "arguments": "{\"file_path\": \"main.go\", \"content\": \"fix\"}"}, "type": "function"}], "message_id": "msg-003"}
+{"role": "tool", "content": "Applied successfully.", "name": "search_replace", "tool_call_id": "tc-002"}
+{"role": "assistant", "content": "Fixed. The build should pass now.", "message_id": "msg-004"}

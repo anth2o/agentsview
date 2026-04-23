@@ -1918,6 +1918,8 @@ func (e *Engine) processFile(
 		res = e.processHermes(file, info)
 	case parser.AgentPositron:
 		res = e.processPositron(file, info)
+	case parser.AgentVibe:
+		res = e.processVibe(file, info)
 	default:
 		res = processResult{
 			err: fmt.Errorf(
@@ -2801,6 +2803,35 @@ func (e *Engine) processPositron(
 
 	sess, msgs, err := parser.ParsePositronSession(
 		file.Path, file.Project, e.machine,
+	)
+	if err != nil {
+		return processResult{err: err}
+	}
+	if sess == nil {
+		return processResult{}
+	}
+
+	hash, err := ComputeFileHash(file.Path)
+	if err == nil {
+		sess.File.Hash = hash
+	}
+
+	return processResult{
+		results: []parser.ParseResult{
+			{Session: *sess, Messages: msgs},
+		},
+	}
+}
+
+func (e *Engine) processVibe(
+	file parser.DiscoveredFile, info os.FileInfo,
+) processResult {
+	if e.shouldSkipByPath(file.Path, info) {
+		return processResult{skip: true}
+	}
+
+	sess, msgs, err := parser.ParseVibeSession(
+		file.Path, e.machine,
 	)
 	if err != nil {
 		return processResult{err: err}
